@@ -29,10 +29,9 @@ It is assumed that the images are already undistorted and that we know the FOV o
 ## Results
 The results are shown in the following images:
 
-OpenCV's implementation:
-    - ![OPENCV](Results/Epipolar%20lines%20(OpenCV).png)
-Project's implementation:
-    - ![CUSTOM](Results/Epipolar%20lines%20(Custom).png)
+OpenCV's implementation vs Custom implementation:
+
+<img src="Results/Epipolar%20lines%20(OpenCV).png" width="320"> <img src="Results/Epipolar%20lines%20(Custom).png" width="320">
 
 As we can see, the results the usage of LO-RANSAC gets better results than the OpenCV's implementation.
 
