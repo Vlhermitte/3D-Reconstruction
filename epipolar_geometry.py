@@ -130,6 +130,40 @@ def compute_epipolar_errors(F, u1, u2):
 
     return errors1, errors2
 
+def get_best_F(idx, u1, u2):
+    """
+    Generate all 7-tuples from the selected set of 12 correspondences,
+    estimate F for each of them and chose the one,
+    that minimizes maximal epipolar error over all matches.
+    :param idx: 7-tuple of indices
+    :param u1: 3xN array of homogeneous coordinates
+    :param u2: 3xN array of homogeneous coordinates
+    :return: 3x3 fundamental matrix
+    """
+    assert u1.shape[0] == 3, f"u1 shape is {u1.shape}, expected (3, N)"
+    assert u2.shape[0] == 3, f"u2 shape is {u2.shape}, expected (3, N)"
+
+    max_error = np.inf
+    F_best = None
+    best_indices = None
+    selected_u1 = u1[:, idx]
+    selected_u2 = u2[:, idx]
+
+    # Generate all combinations of fundamental matrices
+    combinations = list(itertools.combinations(range(12), 7))
+    for comb in combinations:
+        u1_ = selected_u1[:, comb]
+        u2_ = selected_u2[:, comb]
+        FF = u2F(u1_, u2_)
+        for F in FF:
+            errors = sum(compute_epipolar_errors(F, u1, u2))
+            if np.max(errors) < max_error:
+                max_error = np.max(errors)
+                F_best = F
+                best_indices = comb
+        best_points = idx[list(best_indices)]
+        return F_best, best_points
+
 def get_best_E(idx, u1, u2, K1, K2):
     """
     Get the best Essential matrix from a list of points and camera calibration matrix

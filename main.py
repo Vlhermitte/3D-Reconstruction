@@ -16,7 +16,6 @@ from epipolar_geometry import get_best_E, EKs2F, E2RsCs
 
 
 
-
 if __name__ == '__main__':
     # Load Cameras data
     df = pd.read_csv(os.path.join('data', 'cameras_parameters.csv'), sep=';')
@@ -49,7 +48,7 @@ if __name__ == '__main__':
     print("Matches found: ", pts0.shape[0])
 
     # Plot the matches
-    plot_matches(images[0], images[1], pts0, pts1)
+    #plot_matches(images[0], images[1], pts0, pts1)
 
     # 1. Reconstruction using OpenCV functions
     points_3d_cv = reconstruction_opencv.reconstruct_scene(pts0, pts1, Ks[0], Ks[1], images[0], images[1])
@@ -57,9 +56,9 @@ if __name__ == '__main__':
     # 2. Reconstruction using custom functions
     points_3d = reconstruction.reconstruct_scene(pts0, pts1, Ks[0], Ks[1], images[0], images[1])
 
-    # 3. Plot the 3D points
+    # 3. Plot the 3D points TODO: Implement this part
     # 3.1 Plot the 3D points using OpenCV functions
-    plot_vertices(points_3d_cv, title='3D points (OpenCV reconstruction)')
+    #plot_vertices(points_3d_cv, title='3D points (OpenCV reconstruction)')
 
     # 3.2 Plot the 3D points using custom functions
-    plot_vertices(points_3d, title='3D points (Custom reconstruction)')
+    #plot_vertices(points_3d, title='3D points (Custom reconstruction)')
