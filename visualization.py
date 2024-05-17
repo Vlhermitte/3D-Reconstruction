@@ -89,6 +89,6 @@ def plot_epipolar_line(image1, image2, u1, u2, ix, F, title=None):
     if title:
         fig.suptitle(title)
         # Save the figure
-        plt.savefig(title + '.png')
+        plt.savefig('Results/' + title + '.png')
     plt.show()
     plt.close()
