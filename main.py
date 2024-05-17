@@ -10,7 +10,7 @@ import pandas as pd
 import reconstruction_opencv
 import reconstruction
 from object_loading import load_obj
-from visualization import plot_image, plot_matches
+from visualization import plot_image, plot_matches, plot_vertices
 from features_detection import match_images
 from epipolar_geometry import get_best_E, EKs2F, E2RsCs
 
@@ -46,6 +46,10 @@ if __name__ == '__main__':
     # Apply SIFT to find keypoints and descriptors
     sift = cv2.SIFT_create()
     pts0, pts1 = match_images(images, sift)
+    print("Matches found: ", pts0.shape[0])
+
+    # Plot the matches
+    plot_matches(images[0], images[1], pts0, pts1)
 
     # 1. Reconstruction using OpenCV functions
     points_3d_cv = reconstruction_opencv.reconstruct_scene(pts0, pts1, Ks[0], Ks[1], images[0], images[1])
@@ -55,23 +59,7 @@ if __name__ == '__main__':
 
     # 3. Plot the 3D points
     # 3.1 Plot the 3D points using OpenCV functions
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
-    ax.scatter(points_3d_cv[:, 0], points_3d_cv[:, 1], points_3d_cv[:, 2])
-    ax.set_xlabel('X')
-    ax.set_ylabel('Y')
-    ax.set_zlabel('Z')
-    ax.set_title('3D points (OpenCV)')
-    plt.show()
-    plt.close()
+    plot_vertices(points_3d_cv, title='3D points (OpenCV reconstruction)')
 
     # 3.2 Plot the 3D points using custom functions
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
-    ax.scatter(points_3d[:, 0], points_3d[:, 1], points_3d[:, 2])
-    ax.set_xlabel('X')
-    ax.set_ylabel('Y')
-    ax.set_zlabel('Z')
-    ax.set_title('3D points (Custom)')
-    plt.show()
-    plt.close()
+    plot_vertices(points_3d, title='3D points (Custom reconstruction)')

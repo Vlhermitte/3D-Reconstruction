@@ -2,10 +2,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
-def plot_vertices(vertices):
+def plot_vertices(vertices, title=None):
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
     ax.scatter(vertices[:, 0], vertices[:, 1], vertices[:, 2])
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('Z')
+    if title:
+        ax.set_title(title)
     plt.show()
 
 def plot_faces(vertices, faces):
@@ -35,7 +40,7 @@ def plot_matches(image0, image1, pts0, pts1):
     plt.show()
     plt.close()
 
-def plot_epipolar_line(image1, image2, u1, u2, ix, F):
+def plot_epipolar_line(image1, image2, u1, u2, ix, F, title=None):
     """
     Plot the epipolar lines and points
 
@@ -81,5 +86,9 @@ def plot_epipolar_line(image1, image2, u1, u2, ix, F):
         ax_.axis('off')
 
     plt.tight_layout()
+    if title:
+        fig.suptitle(title)
+        # Save the figure
+        plt.savefig(title + '.png')
     plt.show()
     plt.close()

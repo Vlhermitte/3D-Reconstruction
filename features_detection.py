@@ -21,8 +21,13 @@ def match_images(images, sift):
     matches = bf.knnMatch(descriptors[0], descriptors[1], k=2)
     good_matches = []
     for m, n in matches:
-        if m.distance < 0.8 * n.distance:
+        if m.distance < 0.75 * n.distance:
             good_matches.append(m)
+    # sort them by distance
+    good_matches = sorted(good_matches, key=lambda x: x.distance)
+    # select the best 12
+    good_matches = good_matches[:12]
+
     # Get keypoints coordinates
     pts0 = np.array([keypoints[0][m.queryIdx].pt for m in good_matches])
     pts1 = np.array([keypoints[1][m.trainIdx].pt for m in good_matches])

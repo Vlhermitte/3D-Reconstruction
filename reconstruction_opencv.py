@@ -17,15 +17,15 @@ def reconstruct_scene(pts0, pts1, K1, K2, image1, image2):
     """
 
     F, mask = cv2.findFundamentalMat(pts0, pts1, cv2.RANSAC)
-    pts0 = pts0[mask.ravel() == 1]
-    pts1 = pts1[mask.ravel() == 1]
+    # pts0 = pts0[mask.ravel() == 1]
+    # pts1 = pts1[mask.ravel() == 1]
 
     E, _ = cv2.findEssentialMat(pts0, pts1, K1, method=cv2.RANSAC)
 
     # Plot epipolar lines
     u1 = np.vstack([pts0.T, np.ones(pts0.shape[0])])
     u2 = np.vstack([pts1.T, np.ones(pts1.shape[0])])
-    plot_epipolar_line(image1, image2, u1, u2, np.arange(u1.shape[1]), F)
+    plot_epipolar_line(image1, image2, u1, u2, np.arange(u1.shape[1]), F, title='Epipolar lines (OpenCV)')
 
     # Compute the projection matrices
     _, R, C, _ = cv2.recoverPose(E, pts0, pts1, K1)
