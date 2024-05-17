@@ -31,7 +31,7 @@ The results are shown in the following images:
 
 OpenCV's implementation vs Custom implementation:
 
-<img src="Results/Epipolar%20lines%20(OpenCV).png" width="320"> <img src="Results/Epipolar%20lines%20(Custom).png" width="320">
+<img src="Results/Epipolar%20lines%20(OpenCV).png" width="480">  |  <img src="Results/Epipolar%20lines%20(Custom).png" width="480">
 
 As we can see, the results the usage of LO-RANSAC gets better results than the OpenCV's implementation.
 
