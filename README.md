@@ -36,6 +36,10 @@ OpenCV's implementation vs Custom implementation:
 As we can see, the results of our implementation are different from OpenCV's. 
 This is due to the fact that we are using a different ransac method to calculate the fundamental matrix.
 
+It is important to note that this scene is actually not easy to reconstruct.
+The object has flat surfaces and not many features to match.
+Thus, a lot of features computer by SIFT are on the ground or the background which is not ideal for the reconstruction.
+With more reliable features, the computation of the epipolar geometry would be more consistent and accurate.
 
 ---
 ## Requirements
