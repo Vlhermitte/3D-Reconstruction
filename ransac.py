@@ -81,7 +81,7 @@ def ransac_f(pts_matches: np.array, th: float = 20.0, conf: float = 0.90, max_it
         # Sample 4 correspondences
         sample_pts = sample(pts_matches[0], pts_matches[1], 7)
 
-        # Estimate homography from the sample
+        # Estimate Fundamental matrix from the sampled points
         FF = u2F(sample_pts[0], sample_pts[1])
 
         if len(FF) == 0:

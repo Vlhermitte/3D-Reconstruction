@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-from epipolar_geometry import EKs2F, E2RsCs, FKs2E
+from epipolar_geometry import E2RsCs, FKs2E
 from visualization import plot_epipolar_line
 from ransac import ransac_f
 
