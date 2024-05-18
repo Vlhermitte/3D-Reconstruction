@@ -33,7 +33,8 @@ OpenCV's implementation vs Custom implementation:
 
 <img src="Results/Epipolar%20lines%20(OpenCV).png" width="384">   <img src="Results/Epipolar%20lines%20(Custom).png" width="384">
 
-As we can see, the results the usage of LO-RANSAC gets better results than the OpenCV's implementation.
+As we can see, the results of our implementation are different from OpenCV's. 
+This is due to the fact that we are using a different ransac method to calculate the fundamental matrix.
 
 
 ---
