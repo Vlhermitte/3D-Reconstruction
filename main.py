@@ -10,6 +10,7 @@ import pandas as pd
 import reconstruction_opencv
 import reconstruction
 from features_detection import match_images
+from visualization import plot_matches, plot_image, plot_vertices
 
 
 
@@ -36,8 +37,13 @@ if __name__ == '__main__':
         K[2, 2] = 1
         Ks.append(K)
 
-    #plot_image(images[0], 'Image 0')
-    #plot_image(images[1], 'Image 1')
+    # Undistort the images
+    for i in range(len(images)):
+        k1, k2, k3, p1, p2 = df['k1'].values[i], df['k2'].values[i], df['k3'].values[i], df['p1'].values[i], df['p2'].values[i]
+        images[i] = cv2.undistort(images[i], Ks[i], np.array([k1, k2, k3, p1, p2]))
+
+    plot_image(images[0], 'Image 0')
+    plot_image(images[1], 'Image 1')
 
     # Apply SIFT to find keypoints and descriptors
     sift = cv2.SIFT_create()

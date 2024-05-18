@@ -24,7 +24,7 @@ You can find the theory relevant to this project in the following link:
 ## Data
 The images used in this project were taken using another project of mine : [LensDistortionOpenGL](https://github.com/Vlhermitte/LensDistortionOpenGL)
 
-It is assumed that the images are already undistorted and that we know the FOV of the cameras which allows us to calculate the intrinsic matrices K.
+It is assumed that we already know the FOV of the cameras which allows us to calculate the intrinsic matrices K.
 
 ## Results
 The results are shown in the following images:
