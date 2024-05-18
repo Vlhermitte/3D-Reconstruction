@@ -98,7 +98,8 @@ def ransac_f(pts_matches: np.array, th: float = 20.0, conf: float = 0.90, max_it
                 inlier = inliers
         if LO_RANSAC: # if LO-RANSAC mode is enabled, perform local optimization
             max_iter = nsamples(inlier.sum(), pts_matches.shape[2], 7, conf)
-            max_iter = min(max_iter, 10000) # Limit the number of iterations to 100000
+            # Limit the number of iterations to 100000 max (if the matches are not good, the local optimization will compute a big number of iterations)
+            max_iter = min(max_iter, 10000)
         i += 1
 
     assert inlier.size == pts_matches.shape[2], f"Expected {pts_matches.shape[2]} inliers, got {inlier.size} inliers."

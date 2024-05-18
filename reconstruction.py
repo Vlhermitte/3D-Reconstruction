@@ -14,11 +14,11 @@ def reconstruct_scene(pts0, pts1, K1, K2, image1, image2):
     print(f"Fundamental matrix:\n{F}")
     print(f"Selected points: {selected_points}")
 
-    # Compute the best Essential matrix
+    # Compute the Essential matrix
     E = FKs2E(F, K1=K1, K2=K2)
     print(f"Essential matrix:\n{E}")
 
-    # Compute the best Rotation and Translation
+    # Compute the Rotation and Translation
     R1, R2s, C1, C2s = E2RsCs(E)
     print(f"R1:\n{R1}")
     print(f"R2:\n{R2s}")
