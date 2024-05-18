@@ -1,8 +1,23 @@
 import cv2
 import numpy as np
 
-from visualization import plot_epipolar_line
+from visualization import plot_epipolar_lines
 
+
+def compute_epipolar_geometry(pts0, pts1, K1, K2):
+
+    # Compute the best Fundamental matrix using ransac
+    F, mask = cv2.findFundamentalMat(pts0, pts1, cv2.RANSAC)
+    pts0 = pts0[mask.ravel() == 1]
+    pts1 = pts1[mask.ravel() == 1]
+
+    # Compute the Essential matrix
+    E, _ = cv2.findEssentialMat(pts0, pts1, K1, method=cv2.RANSAC)
+
+    # Compute the Rotation and Translation
+    _, R, C, _ = cv2.recoverPose(E, pts0, pts1, K1)
+
+    return F, E, R, C
 
 def reconstruct_scene(pts0, pts1, K1, K2, image1, image2):
     """
@@ -25,7 +40,6 @@ def reconstruct_scene(pts0, pts1, K1, K2, image1, image2):
     # Plot epipolar lines
     u1 = np.vstack([pts0.T, np.ones(pts0.shape[0])])
     u2 = np.vstack([pts1.T, np.ones(pts1.shape[0])])
-    plot_epipolar_line(image1, image2, u1, u2, np.arange(u1.shape[1]), F, title='Epipolar lines (OpenCV)')
 
     # Compute the projection matrices
     _, R, C, _ = cv2.recoverPose(E, pts0, pts1, K1)

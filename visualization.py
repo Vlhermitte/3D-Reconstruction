@@ -40,7 +40,7 @@ def plot_matches(image0, image1, pts0, pts1):
     plt.show()
     plt.close()
 
-def plot_epipolar_line(image1, image2, u1, u2, ix, F, title=None):
+def plot_epipolar_lines(image1, image2, u1, u2, ix, F, title=None):
     """
     Plot the epipolar lines and points
 

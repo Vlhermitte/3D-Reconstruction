@@ -10,7 +10,7 @@ import pandas as pd
 import reconstruction_opencv
 import reconstruction
 from features_detection import match_images
-from visualization import plot_matches, plot_image, plot_vertices
+from visualization import plot_matches, plot_image, plot_vertices, plot_epipolar_lines
 
 
 
@@ -53,15 +53,16 @@ if __name__ == '__main__':
     # Plot the matches
     #plot_matches(images[0], images[1], pts0, pts1)
 
-    # 1. Reconstruction using OpenCV functions
-    points_3d_cv = reconstruction_opencv.reconstruct_scene(pts0, pts1, Ks[0], Ks[1], images[0], images[1])
+    # Plot the epipolar lines
+    u1 = np.vstack([pts0.T, np.ones(pts0.shape[0])])
+    u2 = np.vstack([pts1.T, np.ones(pts1.shape[0])])
 
-    # 2. Reconstruction using custom functions
-    points_3d = reconstruction.reconstruct_scene(pts0, pts1, Ks[0], Ks[1], images[0], images[1])
+    # Compute the epipolar geometry (using OpenCV)
+    F_, E_, R_, C_ = reconstruction_opencv.compute_epipolar_geometry(pts0, pts1, Ks[0], Ks[1])
 
-    # 3. Plot the 3D points TODO: Implement this part
-    # 3.1 Plot the 3D points using OpenCV functions
-    #plot_vertices(points_3d_cv, title='3D points (OpenCV reconstruction)')
+    # Compute the epipolar geometry
+    F, E, R1, R2s, C1, C2s = reconstruction.compute_epipolar_geometry(pts0, pts1, Ks[0], Ks[1])
 
-    # 3.2 Plot the 3D points using custom functions
-    #plot_vertices(points_3d, title='3D points (Custom reconstruction)')
+    plot_epipolar_lines(images[0], images[1], u1, u2, np.arange(u1.shape[1]), F_, title='Epipolar lines (OpenCV)')
+    plot_epipolar_lines(images[0], images[1], u1, u2, np.arange(u1.shape[1]), F, title='Epipolar lines (Custom)')
+
