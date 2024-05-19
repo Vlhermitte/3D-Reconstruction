@@ -51,7 +51,7 @@ if __name__ == '__main__':
     print("Matches found: ", pts0.shape[0])
 
     # Plot the matches
-    #plot_matches(images[0], images[1], pts0, pts1)
+    plot_matches(images[0], images[1], pts0, pts1)
 
     # Plot the epipolar lines
     u1 = np.vstack([pts0.T, np.ones(pts0.shape[0])])
@@ -65,4 +65,12 @@ if __name__ == '__main__':
 
     plot_epipolar_lines(images[0], images[1], u1, u2, np.arange(u1.shape[1]), F_, title='Epipolar lines (OpenCV)')
     plot_epipolar_lines(images[0], images[1], u1, u2, np.arange(u1.shape[1]), F, title='Epipolar lines (Custom)')
+
+    # Triangulate the points
+    pts3d_opencv = reconstruction_opencv.reconstruct_scene(pts0, pts1, Ks[0], Ks[1], R_, C_)
+    pts3d = reconstruction.reconstruct_scene(pts0, pts1, Ks[0], Ks[1], images[0], images[1])
+
+    # Plot the 3D points
+    plot_vertices(pts3d_opencv, title='3D points (OpenCV)')
+    plot_vertices(pts3d, title='3D points')
 
