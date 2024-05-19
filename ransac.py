@@ -20,7 +20,8 @@ def sample(pts1, pts2, n):
 
     return pts1_sample, pts2_sample
 
-def nsamples(n_inliers:int, num_tc:int, sample_size:int , conf: float):
+
+def nsamples(n_inliers: int, num_tc: int, sample_size: int, conf: float):
     """
     Function, which calculates number of samples needed to achieve desired confidence
     :param n_inliers: number of inliers
@@ -38,8 +39,10 @@ def nsamples(n_inliers:int, num_tc:int, sample_size:int , conf: float):
     inl_ratio = n_inliers / num_tc
     return np.ceil(np.log(1 - conf) / np.log(1 - np.power(inl_ratio, sample_size)))
 
+
 def slope(p1, p2):
     return (p2[1] - p1[1]) / (p2[0] - p1[0]) if p2[0] != p1[0] else None
+
 
 def fdist(F, pts1, pts2):
     """
@@ -54,11 +57,13 @@ def fdist(F, pts1, pts2):
 
     l2 = F @ pts1
     l1 = F.T @ pts2
-    dist = np.abs(np.sum(pts1 * l1, axis=0)) / np.linalg.norm(l1[:2], axis=0) + np.abs(np.sum(pts2 * l2, axis=0)) / np.linalg.norm(l2[:2], axis=0)
+    dist = np.abs(np.sum(pts1 * l1, axis=0)) / np.linalg.norm(l1[:2], axis=0) + np.abs(
+        np.sum(pts2 * l2, axis=0)) / np.linalg.norm(l2[:2], axis=0)
     return dist
 
 
-def ransac_f(pts_matches: np.array, th: float = 20.0, conf: float = 0.90, max_iter:int = 1000, LO_RANSAC: bool = False):
+def ransac_f(pts_matches: np.array, th: float = 20.0, conf: float = 0.90, max_iter: int = 1000,
+             LO_RANSAC: bool = False):
     """
     RANSAC algorithm to find the best model
     LO-RANSAC (Locally Optimized RANSAC) is a variant of RANSAC that uses a local optimization step to improve the model estimate.
@@ -96,7 +101,9 @@ def ransac_f(pts_matches: np.array, th: float = 20.0, conf: float = 0.90, max_it
             if inliers.sum() > inlier.sum():
                 best_F = F
                 inlier = inliers
-        if LO_RANSAC: # if LO-RANSAC mode is enabled, perform local optimization
+        if LO_RANSAC:  # if LO-RANSAC mode is enabled, perform local optimization
+            # TODO : Perform local optimization (iterative least squares) to improve the model estimate
+            # ...
             max_iter = nsamples(inlier.sum(), pts_matches.shape[2], 7, conf)
             # Limit the number of iterations to 100000 max (if the matches are not good, the local optimization will compute a big number of iterations)
             max_iter = min(max_iter, 10000)
