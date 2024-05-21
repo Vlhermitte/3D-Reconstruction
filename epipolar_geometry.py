@@ -162,7 +162,7 @@ def get_best_F(idx, u1, u2):
                 F_best = F
                 best_indices = comb
         best_points = idx[list(best_indices)]
-        return F_best, best_points
+    return F_best, best_points
 
 def get_best_E(idx, u1, u2, K1, K2):
     """
