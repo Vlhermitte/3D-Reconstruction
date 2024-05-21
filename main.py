@@ -70,8 +70,8 @@ if __name__ == '__main__':
     print(f"OpenCV Fundamental matrix Error: {sum(compute_epipolar_errors(F_, u1, u2)).mean()}")
     print(f"Custom Fundamental matrix Error: {sum(compute_epipolar_errors(F, u1, u2)).mean()}")
 
-    # plot_epipolar_lines(images[0], images[1], u1, u2, np.arange(u1.shape[1]), F_, title='Epipolar lines (OpenCV)')
-    # plot_epipolar_lines(images[0], images[1], u1, u2, np.arange(u1.shape[1]), F, title='Epipolar lines (Custom)')
+    plot_epipolar_lines(images[0], images[1], u1, u2, np.arange(u1.shape[1]), F_, title='Epipolar lines (OpenCV)')
+    plot_epipolar_lines(images[0], images[1], u1, u2, np.arange(u1.shape[1]), F, title='Epipolar lines (Custom)')
 
     # Triangulate the points
     pts3d_opencv = reconstruction_opencv.reconstruct_scene(pts0, pts1, Ks[0], Ks[1], R_, C_)
