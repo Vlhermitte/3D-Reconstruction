@@ -11,7 +11,7 @@ import scipy.io as sio
 import reconstruction_opencv
 import reconstruction
 from features_detection import match_images
-from visualization import plot_matches, plot_image, plot_vertices, plot_epipolar_lines
+from visualization import plot_matches, plot_image, plot_epipolar_lines, plot_3D_points
 from epipolar_geometry import compute_epipolar_errors
 
 
@@ -64,20 +64,20 @@ if __name__ == '__main__':
     print("Fundamental matrix (OpenCV): ", F_)
 
     # Compute the epipolar geometry
-    F, E, R1, R2s, C1, C2s = reconstruction.compute_epipolar_geometry(pts0, pts1, Ks[0], Ks[1])
+    F, E, R1, R2, C1, C2 = reconstruction.compute_epipolar_geometry(pts0, pts1, Ks[0], Ks[1])
     print("Fundamental matrix: ", F)
 
     print(f"OpenCV Fundamental matrix Error: {sum(compute_epipolar_errors(F_, u1, u2)).mean()}")
     print(f"Custom Fundamental matrix Error: {sum(compute_epipolar_errors(F, u1, u2)).mean()}")
 
-    plot_epipolar_lines(images[0], images[1], u1, u2, np.arange(u1.shape[1]), F_, title='Epipolar lines (OpenCV)')
-    plot_epipolar_lines(images[0], images[1], u1, u2, np.arange(u1.shape[1]), F, title='Epipolar lines (Custom)')
+    # plot_epipolar_lines(images[0], images[1], u1, u2, np.arange(u1.shape[1]), F_, title='Epipolar lines (OpenCV)')
+    # plot_epipolar_lines(images[0], images[1], u1, u2, np.arange(u1.shape[1]), F, title='Epipolar lines (Custom)')
 
     # Triangulate the points
     pts3d_opencv = reconstruction_opencv.reconstruct_scene(pts0, pts1, Ks[0], Ks[1], R_, C_)
-    pts3d = reconstruction.reconstruct_scene(pts0, pts1, Ks[0], Ks[1], images[0], images[1])
+    pts3d = reconstruction.reconstruct_scene(pts0, pts1, Ks[0], Ks[1])
 
-    # Plot the 3D points (Still in progress)
-    # plot_vertices(pts3d_opencv, title='3D points (OpenCV)')
-    # plot_vertices(pts3d, title='3D points')
+    # Plot the 3D points
+    plot_3D_points(pts3d_opencv, title='3D points (OpenCV)')
+    plot_3D_points(pts3d, title='3D points (Custom)')
 

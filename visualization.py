@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
-def plot_vertices(vertices, title=None):
+def plot_vertices(vertices, title=None) -> None:
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
     ax.scatter(vertices[:, 0], vertices[:, 1], vertices[:, 2])
@@ -13,7 +13,7 @@ def plot_vertices(vertices, title=None):
         ax.set_title(title)
     plt.show()
 
-def plot_faces(vertices, faces):
+def plot_faces(vertices, faces) -> None:
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
     for face in faces:
@@ -21,14 +21,14 @@ def plot_faces(vertices, faces):
     plt.show()
     plt.close()
 
-def plot_image(image, title=None):
+def plot_image(image, title=None) -> None:
     plt.imshow(image)
     if title:
         plt.title(title)
     plt.show()
     plt.close()
 
-def plot_matches(image0, image1, pts0, pts1):
+def plot_matches(image0, image1, pts0, pts1) -> None:
     fig, ax = plt.subplots()
     ax.imshow(np.hstack((image0, image1)))
     ax.plot(pts0[:, 0], pts0[:, 1], 'o')
@@ -40,7 +40,7 @@ def plot_matches(image0, image1, pts0, pts1):
     plt.show()
     plt.close()
 
-def plot_epipolar_lines(image1, image2, u1, u2, ix, F, title=None):
+def plot_epipolar_lines(image1, image2, u1, u2, ix, F, title=None) -> None:
     """
     Plot the epipolar lines and points
 
@@ -90,5 +90,37 @@ def plot_epipolar_lines(image1, image2, u1, u2, ix, F, title=None):
         fig.suptitle(title)
         # Save the figure
         plt.savefig('Results/' + title + '.png')
+    plt.show()
+    plt.close()
+
+def plot_3D_points(X, edges=None, azimuth=-60, elevation=30, title=None) -> None:
+    """
+    Plot the 3D points
+    param X: 3D points
+    param edges: edges to plot
+    param azimuth: azimuth angle
+    param elevation: elevation angle
+    param title: plot title
+    """
+    fig = plt.figure()
+    ax = fig.add_subplot(projection='3d')
+    ax.set_box_aspect(aspect=(1.5, 1.2, 1))
+
+    ax.scatter(X[0], X[1], X[2], c='r', marker='o')
+
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('Z')
+
+    if edges is not None:
+        for x, y, z in zip(X[0, edges].T, X[1, edges].T, X[2, edges].T):
+            ax.plot(x, y, z, 'y-')
+
+    ax.view_init(elev=elevation, azim=azimuth)
+
+    if title is not None:
+        plt.title(title)
+        plt.savefig('Results/' + title + '.png')
+
     plt.show()
     plt.close()

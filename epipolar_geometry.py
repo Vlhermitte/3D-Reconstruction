@@ -88,7 +88,7 @@ def EKs2F(E, K1, K2):
     F = np.linalg.inv(K2).T @ E @ np.linalg.inv(K1)
     return F
 
-def E2RsCs(E):
+def E2RsCs(E, u1, u2):
     """
     Compute the rotation matrices and camera positions from the Essential matrix
     :param E:
@@ -108,7 +108,23 @@ def E2RsCs(E):
     C2_1 = U[:, 2]
     C2_2 = -U[:, 2]
 
-    return R1, [R2_1, R2_2], C1, [C2_1, C2_2]
+    in_front_both_best = -np.inf
+    R2_best = None
+    C2_best = None
+    P1 = np.hstack([R1, -R1 @ C1.reshape(-1, 1)])
+    for R2, C2 in itertools.product([R2_1, R2_2], [C2_1, C2_2]):
+        P2 = np.hstack([R2, -R2 @ C2.reshape(-1, 1)])
+        X = triangulate_points(P1, P2, u1, u2)[0:3, :]
+        in_front_C1 = np.einsum('ij, ij -> j', u1, X) > 0
+        in_front_C2 = np.einsum('ij, ij -> j', u2, X) > 0
+        in_front_both = (in_front_C1 & in_front_C2).sum()
+
+        if in_front_both > in_front_both_best:
+            in_front_both_best = in_front_both
+            R2_best = R2
+            C2_best = C2
+
+    return R1, R2_best, C1, C2_best
 
 def compute_epipolar_errors(F, u1, u2):
     """
@@ -130,85 +146,35 @@ def compute_epipolar_errors(F, u1, u2):
 
     return errors1, errors2
 
-def get_best_F(idx, u1, u2):
+def triangulate_points(P1, P2, pts0, pts1):
     """
-    Generate all 7-tuples from the selected set of 12 correspondences,
-    estimate F for each of them and chose the one,
-    that minimizes maximal epipolar error over all matches.
-    :param idx: 7-tuple of indices
-    :param u1: 3xN array of homogeneous coordinates
-    :param u2: 3xN array of homogeneous coordinates
-    :return: 3x3 fundamental matrix
+    Triangulate the points in 3D space using the projection matrices
+    :param pts0: Points in the first image (Nx2 array)
+    :param pts1: Points in the second image (Nx2 array)
+    :param P1: Projection matrix of the first camera (3x4 matrix)
+    :param P2: Projection matrix of the second camera (3x4 matrix)
+    :return: 3D points (Nx3 array)
     """
-    assert u1.shape[0] == 3, f"u1 shape is {u1.shape}, expected (3, N)"
-    assert u2.shape[0] == 3, f"u2 shape is {u2.shape}, expected (3, N)"
+    N = pts0.shape[1]
+    X = np.zeros((4, N))
 
-    max_error = np.inf
-    F_best = None
-    best_indices = None
-    selected_u1 = u1[:, idx]
-    selected_u2 = u2[:, idx]
+    p11, p12, p13 = P1
+    p21, p22, p23 = P2
+    for i in range(N):
+        A = np.vstack([
+            pts0[0, i] * p13 - p11,
+            pts0[1, i] * p13 - p12,
+            pts1[0, i] * p23 - p21,
+            pts1[1, i] * p23 - p22
+        ])
+        _, _, Vt = np.linalg.svd(A)
+        X[:, i] = Vt[-1]
 
-    # Generate all combinations of fundamental matrices
-    combinations = list(itertools.combinations(range(12), 7))
-    for comb in combinations:
-        u1_ = selected_u1[:, comb]
-        u2_ = selected_u2[:, comb]
-        FF = u2F(u1_, u2_)
-        for F in FF:
-            errors = sum(compute_epipolar_errors(F, u1, u2))
-            if np.max(errors) < max_error:
-                max_error = np.max(errors)
-                F_best = F
-                best_indices = comb
-        best_points = idx[list(best_indices)]
-    return F_best, best_points
+    # Normalize the 3D points
+    X = X / X[-1]
+    return X
 
-def get_best_E(idx, u1, u2, K1, K2):
-    """
-    Get the best Essential matrix from a list of points and camera calibration matrix
-
-    :param idx: indices of the points
-    :param u1: homogeneous coordinates of image 1
-    :param u2: homogeneous coordinates of image 2
-    :param K1: Camera 1 calibration matrix
-    :param K2: Camera 2 calibration matrix
-    :return: best Essential matrix, best Fundamental matrix, and the selected points
-    """
-    assert u1.shape[0] == 3, f"u1 shape is {u1.shape}, expected (3, N)"
-    assert u2.shape[0] == 3, f"u2 shape is {u2.shape}, expected (3, N)"
-    assert K1.shape == (3, 3), f"K shape is {K1.shape}, expected (3, 3)"
-    assert K2.shape == (3, 3), f"K shape is {K2.shape}, expected (3, 3)"
-
-    max_error = np.inf
-    Fe_best = None
-    E_best = None
-    best_indices = None
-    selected_u1 = u1[:, idx]
-    selected_u2 = u2[:, idx]
-
-    # Generate all combinations of fundamental matrices
-    combinations = list(itertools.combinations(range(len(idx)), 7))
-    for comb in combinations:
-        u1_ = selected_u1[:, comb]
-        u2_ = selected_u2[:, comb]
-        # get all possible F from 7 points
-        FF = u2F(u1_, u2_)
-        for F in FF:
-            # Compute E from F
-            E = FKs2E(F, K1=K1, K2=K2)    # Assuming K1 = K2
-            # Reconstruct F from E
-            Fe = EKs2F(E, K1=K1, K2=K2)   # Assuming K1 = K2
-            # Compute epipolar errors using Fe
-            errors = sum(compute_epipolar_errors(Fe, u1, u2))
-            if np.max(errors) < max_error:
-                max_error = np.max(errors)
-                E_best = E
-                Fe_best = Fe
-                best_indices = comb
-
-    best_points = idx[list(best_indices)]
-    return E_best, Fe_best, best_points
+    return np.array(pts_3d)
 
 
 def u2F_polynom(G1, G2):

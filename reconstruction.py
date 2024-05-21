@@ -3,11 +3,19 @@ import numpy as np
 import scipy
 import scipy.linalg
 
-from epipolar_geometry import E2RsCs, FKs2E
+from epipolar_geometry import E2RsCs, FKs2E, triangulate_points
 from ransac import ransac_f
 
 
 def compute_epipolar_geometry(pts0, pts1, K1, K2):
+    """
+    Compute the epipolar geometry from the points in the images and the cameras calibration matrices
+    :param pts0: points in image 1
+    :param pts1: points in image 2
+    :param K1: camera 1 calibration matrix
+    :param K2: camera 2 calibration matrix
+    :return: Fundamental matrix, Essential matrix, Rotation matrices, Camera positions
+    """
     u1 = np.vstack([pts0.T, np.ones(pts0.shape[0])])
     u2 = np.vstack([pts1.T, np.ones(pts1.shape[0])])
 
@@ -18,64 +26,35 @@ def compute_epipolar_geometry(pts0, pts1, K1, K2):
     E = FKs2E(F, K1=K1, K2=K2)
 
     # Compute the Rotation and Translation
-    R1, R2s, C1, C2s = E2RsCs(E)
+    R1, R2, C1, C2 = E2RsCs(E, u1, u2)
 
-    return F, E, R1, R2s, C1, C2s
-
-
-def triangulate_points(pts0, pts1, P1, P2):
-    """
-    Triangulate the points in 3D space using the projection matrices
-    :param pts0: Points in the first image (Nx2 array)
-    :param pts1: Points in the second image (Nx2 array)
-    :param P1: Projection matrix of the first camera (3x4 matrix)
-    :param P2: Projection matrix of the second camera (3x4 matrix)
-    :return: 3D points (Nx3 array)
-    """
-    pts_3d = []
-
-    for x1, x2 in zip(pts0, pts1):
-        x1_h = np.array([x1[0], x1[1], 1.0])
-        x2_h = np.array([x2[0], x2[1], 1.0])
-
-        # Formulate the system of equations A @ X = 0
-        A = np.zeros((4, 4))
-        A[0] = x1_h[0] * P1[2] - P1[0]
-        A[1] = x1_h[1] * P1[2] - P1[1]
-        A[2] = x2_h[0] * P2[2] - P2[0]
-        A[3] = x2_h[1] * P2[2] - P2[1]
-
-        # Solve the system using SVD
-        _, _, Vt = np.linalg.svd(A)
-        X = Vt[-1]
-
-        # Normalize the homogeneous coordinates
-        X = X / X[3]
-        pts_3d.append(X[:3])
-
-    return np.array(pts_3d)
+    return F, E, R1, R2, C1, C2
 
 
-def reconstruct_scene(pts0, pts1, K1, K2, image1, image2):
+def reconstruct_scene(pts0, pts1, K1, K2):
     """
     Reconstruct the scene from the Fundamental matrix and the cameras calibration matrices
     :param pts0: points in image 1
     :param pts1: points in image 2
     :param K1: camera 1 calibration matrix
     :param K2: camera 2 calibration matrix
-    :param image1: image 1
-    :param image2: image 2
     :return: 3D points
     """
 
     # Compute the epipolar geometry
-    F, E, R1, R2s, C1, C2s = compute_epipolar_geometry(pts0, pts1, K1, K2)
+    F, E, R1, R2, C1, C2 = compute_epipolar_geometry(pts0, pts1, K1, K2)
 
     # Compute the projection matrices
     P1 = K1 @ np.hstack([R1, C1.reshape(-1, 1)])
-    P2 = K2 @ np.hstack([R2s[0], C2s[0].reshape(-1, 1)])  # Select the first rotation and translation
+    P2 = K2 @ np.hstack([R2, C2.reshape(-1, 1)])  # Select the first rotation and translation
 
     # Triangulate the points
-    pts_3d = triangulate_points(pts0, pts1, P1, P2)
+    K1_inv = np.linalg.inv(K1)
+    K2_inv = np.linalg.inv(K2)
+    pts0 = np.vstack([pts0.T, np.ones(pts0.shape[0])])
+    pts1 = np.vstack([pts1.T, np.ones(pts1.shape[0])])
+    pts0 = K1_inv @ pts0
+    pts1 = K2_inv @ pts1
+    pts_3d = triangulate_points(P1, P2, pts0, pts1)
 
     return pts_3d
