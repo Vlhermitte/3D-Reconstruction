@@ -12,7 +12,7 @@ def compute_epipolar_geometry(pts0, pts1, K1, K2):
     u2 = np.vstack([pts1.T, np.ones(pts1.shape[0])])
 
     # Compute the best Fundamental matrix using ransac
-    F, selected_points = ransac_f(pts_matches=np.array([u1, u2]), conf=0.99, LO_RANSAC=True)
+    F, selected_points = ransac_f(pts_matches=np.array([u1, u2]), th=10.0, conf=0.99)
 
     # Compute the Essential matrix
     E = FKs2E(F, K1=K1, K2=K2)

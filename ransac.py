@@ -1,5 +1,6 @@
 import numpy as np
-from epipolar_geometry import u2F
+from epipolar_geometry import u2F, compute_epipolar_errors
+from scipy.optimize import least_squares
 
 
 def sample(pts1, pts2, n):
@@ -62,16 +63,13 @@ def fdist(F, pts1, pts2):
     return dist
 
 
-def ransac_f(pts_matches: np.array, th: float = 20.0, conf: float = 0.90, max_iter: int = 1000,
-             LO_RANSAC: bool = False):
+def ransac_f(pts_matches: np.array, th: float = 20.0, conf: float = 0.95, max_iter: int = 1000):
     """
-    RANSAC algorithm to find the best model
-    LO-RANSAC (Locally Optimized RANSAC) is a variant of RANSAC that uses a local optimization step to improve the model estimate.
+    RANSAC algorithm to find the best model with smart early stopping computation
     :param pts_matches: 2xN array of points
     :param th: threshold
     :param conf: confidence
     :param max_iter: maximum number of iterations
-    :param mode: mode of RANSAC
     :return: best_model, best_inliers
     """
     assert pts_matches.shape[0] == 2, f"Expected pts_matches to have shape (2, N), got {pts_matches.shape}"
@@ -79,7 +77,7 @@ def ransac_f(pts_matches: np.array, th: float = 20.0, conf: float = 0.90, max_it
     assert max_iter > 0, f"Expected max_iter > 0, got {max_iter}"
 
     best_F = np.eye(3)
-    inlier = np.zeros(pts_matches.shape[2], dtype=bool)
+    inliers = np.zeros(pts_matches.shape[2], dtype=bool)
 
     i = 0
     while i < max_iter:
@@ -96,20 +94,18 @@ def ransac_f(pts_matches: np.array, th: float = 20.0, conf: float = 0.90, max_it
         for F in FF:
             # Calculate the distance between the predicted points and the actual points
             dist = fdist(F, pts_matches[0], pts_matches[1])
-            inliers = dist < th
+            inliers_ = dist < th
 
-            if inliers.sum() > inlier.sum():
+            if inliers_.sum() > inliers.sum():
                 best_F = F
-                inlier = inliers
-        if LO_RANSAC:  # if LO-RANSAC mode is enabled, perform local optimization
-            # TODO : Perform local optimization (iterative least squares) to improve the model estimate
-            # ...
-            max_iter = nsamples(inlier.sum(), pts_matches.shape[2], 7, conf)
-            # Limit the number of iterations to 100000 max (if the matches are not good, the local optimization will compute a big number of iterations)
-            max_iter = min(max_iter, 10000)
+                inliers = inliers_
+
+        max_iter = nsamples(inliers.sum(), pts_matches.shape[2], 7, conf)
+        # Limit the number of iterations to 100000 max (if the matches are not good, the local optimization will compute a big number of iterations)
+        max_iter = min(max_iter, 100000)
         i += 1
 
-    assert inlier.size == pts_matches.shape[2], f"Expected {pts_matches.shape[2]} inliers, got {inlier.size} inliers."
+    assert inliers.size == pts_matches.shape[2], f"Expected {pts_matches.shape[2]} inliers, got {inlier.size} inliers."
     assert best_F.shape == (3, 3), f"Expected (3, 3) fundamental matrix, got {best_F.shape} fundamental matrix."
-    selected_points = np.where(inlier)[0]
+    selected_points = np.where(inliers)[0]
     return best_F, selected_points
