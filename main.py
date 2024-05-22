@@ -8,8 +8,8 @@ from mpl_toolkits.mplot3d import Axes3D
 import pandas as pd
 import scipy.io as sio
 
-import reconstruction_opencv
-import reconstruction
+import reconstruction_opencv as rcv
+import reconstruction as rc
 from features_detection import match_images
 from visualization import plot_matches, plot_image, plot_epipolar_lines, plot_3D_points
 from epipolar_geometry import compute_epipolar_errors
@@ -60,11 +60,11 @@ if __name__ == '__main__':
     u2 = np.vstack([pts1.T, np.ones(pts1.shape[0])])
 
     # Compute the epipolar geometry (using OpenCV)
-    F_, E_, R_, C_ = reconstruction_opencv.compute_epipolar_geometry(pts0, pts1, Ks[0], Ks[1])
+    F_, E_, R_, C_ = rcv.compute_epipolar_geometry(pts0, pts1, Ks[0], Ks[1])
     print("Fundamental matrix (OpenCV): ", F_)
 
     # Compute the epipolar geometry
-    F, E, R1, R2, C1, C2 = reconstruction.compute_epipolar_geometry(pts0, pts1, Ks[0], Ks[1])
+    F, E, R1, R2, C1, C2 = rc.compute_epipolar_geometry(pts0, pts1, Ks[0], Ks[1])
     print("Fundamental matrix: ", F)
 
     print(f"OpenCV Fundamental matrix Error: {sum(compute_epipolar_errors(F_, u1, u2)).mean()}")
@@ -74,8 +74,8 @@ if __name__ == '__main__':
     plot_epipolar_lines(images[0], images[1], u1, u2, np.arange(u1.shape[1]), F, title='Epipolar lines (Custom)')
 
     # Triangulate the points
-    pts3d_opencv = reconstruction_opencv.reconstruct_scene(pts0, pts1, Ks[0], Ks[1], R_, C_)
-    pts3d = reconstruction.reconstruct_scene(pts0, pts1, Ks[0], Ks[1])
+    pts3d_opencv = rcv.reconstruct_scene(pts0, pts1, Ks[0], Ks[1])
+    pts3d = rc.reconstruct_scene(pts0, pts1, Ks[0], Ks[1])
 
     # Plot the 3D points
     plot_3D_points(pts3d_opencv, title='3D points (OpenCV)')

@@ -19,7 +19,7 @@ def compute_epipolar_geometry(pts0, pts1, K1, K2):
 
     return F, E, R, C
 
-def reconstruct_scene(pts0, pts1, K1, K2, image1, image2):
+def reconstruct_scene(pts0, pts1, K1, K2):
     """
     Reconstruct the scene from the Fundamental matrix and the cameras calibration matrices
     :param pts0: points in image 1
@@ -36,10 +36,6 @@ def reconstruct_scene(pts0, pts1, K1, K2, image1, image2):
     # pts1 = pts1[mask.ravel() == 1]
 
     E, _ = cv2.findEssentialMat(pts0, pts1, K1, method=cv2.RANSAC)
-
-    # Plot epipolar lines
-    u1 = np.vstack([pts0.T, np.ones(pts0.shape[0])])
-    u2 = np.vstack([pts1.T, np.ones(pts1.shape[0])])
 
     # Compute the projection matrices
     _, R, C, _ = cv2.recoverPose(E, pts0, pts1, K1)
