@@ -46,7 +46,7 @@ def reconstruct_scene(pts0, pts1, K1, K2):
 
     # Compute the projection matrices
     P1 = K1 @ np.hstack([R1, C1.reshape(-1, 1)])
-    P2 = K2 @ np.hstack([R2, C2.reshape(-1, 1)])  # Select the first rotation and translation
+    P2 = K2 @ np.hstack([R2, C2.reshape(-1, 1)])
 
     # Triangulate the points
     K1_inv = np.linalg.inv(K1)
