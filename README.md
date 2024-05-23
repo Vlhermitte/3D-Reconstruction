@@ -32,14 +32,9 @@ OpenCV's implementation vs Custom implementation:
 
 <img src="Results/Epipolar%20lines%20(OpenCV).png" width="384">   <img src="Results/Epipolar%20lines%20(Custom).png" width="384">
 
-It is important to note that this scene is actually not easy to reconstruct.
-The object has flat surfaces and not many features to match.
-Thus, a lot of features computer by SIFT are on the ground or the background which is not ideal for the reconstruction.
-With more reliable features, the computation of the epipolar geometry would be more consistent and accurate.
-
 ## Possible improvements
 - Use a better feature matching algorithm. (Maybe a CNN)
-- Use a more robust RANSAC method. (Current one is classical RANSAC, LO-RANSAC is better)
+- Implement the 3D mesh reconstruction.
 
 ## References
 You can find the theory relevant to this project in the following link:
