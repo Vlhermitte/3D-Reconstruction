@@ -10,6 +10,8 @@ def compute_epipolar_geometry(pts0, pts1, K1, K2):
     F, mask = cv2.findFundamentalMat(pts0, pts1, cv2.RANSAC)
     pts0 = pts0[mask.ravel() == 1]
     pts1 = pts1[mask.ravel() == 1]
+    # Get the index of the selected points
+    selected_points = np.where(mask.ravel() == 1)[0]
 
     # Compute the Essential matrix
     E, _ = cv2.findEssentialMat(pts0, pts1, K1, method=cv2.RANSAC)
@@ -17,7 +19,7 @@ def compute_epipolar_geometry(pts0, pts1, K1, K2):
     # Compute the Rotation and Translation
     _, R, C, _ = cv2.recoverPose(E, pts0, pts1, K1)
 
-    return F, E, R, C
+    return F, E, R, C, selected_points
 
 def reconstruct_scene(pts0, pts1, K1, K2):
     """
@@ -30,11 +32,6 @@ def reconstruct_scene(pts0, pts1, K1, K2):
     :param image2: image 2
     :return: 3D points
     """
-
-    F, mask = cv2.findFundamentalMat(pts0, pts1, cv2.RANSAC)
-    # pts0 = pts0[mask.ravel() == 1]
-    # pts1 = pts1[mask.ravel() == 1]
-
     E, _ = cv2.findEssentialMat(pts0, pts1, K1, method=cv2.RANSAC)
 
     # Compute the projection matrices

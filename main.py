@@ -53,25 +53,27 @@ if __name__ == '__main__':
     print("Matches found: ", pts0.shape[0])
 
     # Plot the matches
-    # plot_matches(images[0], images[1], pts0, pts1)
+    plot_matches(images[0], images[1], pts0, pts1)
 
     # Plot the epipolar lines
     u1 = np.vstack([pts0.T, np.ones(pts0.shape[0])])
     u2 = np.vstack([pts1.T, np.ones(pts1.shape[0])])
 
     # Compute the epipolar geometry (using OpenCV)
-    F_, E_, R_, C_ = rcv.compute_epipolar_geometry(pts0, pts1, Ks[0], Ks[1])
+    F_, E_, R_, C_, selected_points_ = rcv.compute_epipolar_geometry(pts0, pts1, Ks[0], Ks[1])
     print("Fundamental matrix (OpenCV): ", F_)
+    print(f"OpenCV Selected points: {selected_points_}")
 
     # Compute the epipolar geometry
-    F, E, R1, R2, C1, C2 = rc.compute_epipolar_geometry(pts0, pts1, Ks[0], Ks[1])
+    F, E, R1, R2, C1, C2, selected_points = rc.compute_epipolar_geometry(pts0, pts1, Ks[0], Ks[1])
     print("Fundamental matrix: ", F)
+    print(f"Custom Selected points: {selected_points}")
 
     print(f"OpenCV Fundamental matrix Error: {sum(compute_epipolar_errors(F_, u1, u2)).mean()}")
     print(f"Custom Fundamental matrix Error: {sum(compute_epipolar_errors(F, u1, u2)).mean()}")
 
-    plot_epipolar_lines(images[0], images[1], u1, u2, np.arange(u1.shape[1]), F_, title='Epipolar lines (OpenCV)')
-    plot_epipolar_lines(images[0], images[1], u1, u2, np.arange(u1.shape[1]), F, title='Epipolar lines (Custom)')
+    plot_epipolar_lines(images[0], images[1], u1, u2, selected_points_, F_, title='Epipolar lines (OpenCV)')
+    plot_epipolar_lines(images[0], images[1], u1, u2, selected_points, F, title='Epipolar lines (Custom)')
 
     # Triangulate the points
     pts3d_opencv = rcv.reconstruct_scene(pts0, pts1, Ks[0], Ks[1])

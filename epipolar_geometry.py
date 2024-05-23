@@ -172,9 +172,7 @@ def triangulate_points(P1, P2, pts0, pts1):
 
     # Normalize the 3D points
     X = X / X[-1]
-    return X
-
-    return np.array(pts_3d)
+    return X[:3]
 
 
 def u2F_polynom(G1, G2):

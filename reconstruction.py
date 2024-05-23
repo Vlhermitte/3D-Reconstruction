@@ -20,7 +20,7 @@ def compute_epipolar_geometry(pts0, pts1, K1, K2):
     u2 = np.vstack([pts1.T, np.ones(pts1.shape[0])])
 
     # Compute the best Fundamental matrix using ransac
-    F, selected_points = ransac_f(pts_matches=np.array([u1, u2]), th=10.0, conf=0.99)
+    F, selected_points = ransac_f(pts_matches=np.array([u1, u2]), th=10.0, conf=0.99, LO_RANSAC=True)
 
     # Compute the Essential matrix
     E = FKs2E(F, K1=K1, K2=K2)
@@ -28,7 +28,7 @@ def compute_epipolar_geometry(pts0, pts1, K1, K2):
     # Compute the Rotation and Translation
     R1, R2, C1, C2 = E2RsCs(E, u1, u2)
 
-    return F, E, R1, R2, C1, C2
+    return F, E, R1, R2, C1, C2, selected_points
 
 
 def reconstruct_scene(pts0, pts1, K1, K2):
@@ -42,7 +42,7 @@ def reconstruct_scene(pts0, pts1, K1, K2):
     """
 
     # Compute the epipolar geometry
-    F, E, R1, R2, C1, C2 = compute_epipolar_geometry(pts0, pts1, K1, K2)
+    F, E, R1, R2, C1, C2, _ = compute_epipolar_geometry(pts0, pts1, K1, K2)
 
     # Compute the projection matrices
     P1 = K1 @ np.hstack([R1, C1.reshape(-1, 1)])
