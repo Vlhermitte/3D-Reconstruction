@@ -25,6 +25,8 @@ def match_images(images, sift):
             good_matches.append(m)
     # sort them by distance
     good_matches = sorted(good_matches, key=lambda x: x.distance)
+    # Keep the best 100 matches
+    good_matches = good_matches[:100]
 
     # Get keypoints coordinates
     pts0 = np.array([keypoints[0][m.queryIdx].pt for m in good_matches])
