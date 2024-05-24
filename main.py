@@ -47,9 +47,9 @@ if __name__ == '__main__':
     # plot_image(images[0], 'Image 0')
     # plot_image(images[1], 'Image 1')
 
-    # Apply SIFT to find keypoints and descriptors
-    sift = cv2.SIFT_create()
-    pts0, pts1 = match_images(images, sift)
+    # Apply a feature detector and matcher
+    feature2D = cv2.SIFT_create()
+    pts0, pts1 = match_images(images, feature2D)
     print("Matches found: ", pts0.shape[0])
 
     # Plot the matches

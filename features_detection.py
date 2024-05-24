@@ -1,19 +1,19 @@
 import cv2
 import numpy as np
 
-def match_images(images, sift):
+def match_images(images, feature2d):
     """
-    Match two images using SIFT
+    Match two images using a feature detector and matcher
     :param images:
-    :param sift:
-    :return:
+    :param feature2d:
+    :return: pts0, pts1
     """
     assert len(images) == 2, f"images length is {len(images)}, expected 2"
-    assert isinstance(sift, cv2.SIFT), f"sift type is {type(sift)}, expected cv2.SIFT"
+    assert isinstance(feature2d, cv2.Feature2D), f"sift type is {type(feature2d)}, expected a cv2.Feature2D object"
     keypoints = []
     descriptors = []
     for image in images:
-        keypoints_i, descriptors_i = sift.detectAndCompute(image, None)
+        keypoints_i, descriptors_i = feature2d.detectAndCompute(image, None)
         keypoints.append(keypoints_i)
         descriptors.append(descriptors_i)
     # Match keypoints
