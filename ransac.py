@@ -47,20 +47,26 @@ def slope(p1, p2):
 
 def fdist(F, pts1, pts2):
     """
-    Function, which calculates the distance between the predicted points and the actual points
+    Function, which calculates the Sampson distance
     :param F: 3x3 fundamental matrix
-    :param pts_matches: 2xN array of points
+    :param pts1: 3xN array of points
+    :param pts2: 3xN array of points
     :return: distance
     """
     assert F.shape == (3, 3), f"Expected homography to have shape (3, 3), got {F.shape}"
     assert pts1.shape[0] == 3, f"Expected pts1 to have shape (3, N), got {pts1.shape}"
     assert pts2.shape[0] == 3, f"Expected pts2 to have shape (3, N), got {pts2.shape}"
 
-    l2 = F @ pts1
-    l1 = F.T @ pts2
-    dist = np.abs(np.sum(pts1 * l1, axis=0)) / np.sqrt(l1[0] ** 2 + l1[1] ** 2) + \
-              np.abs(np.sum(pts2 * l2, axis=0)) / np.sqrt(l2[0] ** 2 + l2[1] ** 2)
-    return dist
+    # Compute the epipolar lines
+    l1 = F @ pts1
+    l2 = F.T @ pts2
+
+    # Compute the distance
+    pts2_F_pts1 = np.einsum('ij,ji->i', pts2.T, F @ pts1)
+    d1 = pts2_F_pts1 ** 2 / (l1[0] ** 2 + l1[1] ** 2)
+    d2 = pts2_F_pts1 ** 2 / (l2[0] ** 2 + l2[1] ** 2)
+
+    return d1 + d2
 
 
 def optimize_fundamental_matrix(F, pts1, pts2):
@@ -87,7 +93,6 @@ def optimize_fundamental_matrix(F, pts1, pts2):
             pts2[0], pts2[1], pts2[2]
         ]).sum(axis=1)
         return J
-
 
     res = least_squares(cost, F.flatten(), jac=jacobian)
     return res.x.reshape(3, 3)
